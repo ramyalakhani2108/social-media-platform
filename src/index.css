@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbars for all elements while maintaining scroll functionality */
+@layer utilities {
+  /* For Chrome, Safari, and newer versions of Edge */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* For Firefox */
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+
+  /* For IE and older versions of Edge */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+  }
+
+  /* Apply to all elements with overflow by default */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
