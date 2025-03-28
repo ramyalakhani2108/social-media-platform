@@ -6,16 +6,18 @@ interface MediaPlayerProps {
   mediaType: 'image' | 'video';
   isMuted?: boolean;
   onEnded?: () => void;
+  className?: string;
 }
 
 export const MediaPlayer = ({ 
   mediaUrl, 
   mediaType, 
   isMuted = true, 
-  onEnded 
+  onEnded,
+  className = ''
 }: MediaPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const mediaRef = useRef<HTMLMediaElement>(null);
+  const mediaRef = useRef<HTMLVideoElement>(null);
 
   const handlePlayPause = () => {
     if (mediaRef.current) {
@@ -29,12 +31,12 @@ export const MediaPlayer = ({
   };
 
   return (
-    <div className="relative aspect-square w-full">
+    <div className={`relative aspect-square w-full ${className}`}>
       {mediaType === 'image' ? (
         <motion.img
           src={mediaUrl}
           alt="Post media"
-          className="w-full h-full object-cover rounded-lg"
+          className={`w-full h-full object-cover rounded-lg ${className}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -45,7 +47,7 @@ export const MediaPlayer = ({
           src={mediaUrl}
           muted={isMuted}
           loop
-          className="w-full h-full object-cover rounded-lg"
+          className={`w-full h-full object-cover rounded-lg ${className}`}
           onEnded={onEnded}
           onClick={handlePlayPause}
         />

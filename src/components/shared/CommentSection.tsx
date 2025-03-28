@@ -7,13 +7,15 @@ interface CommentSectionProps {
   onComment: (comment: string) => void;
   showComments: boolean;
   setShowComments: (show: boolean) => void;
+  className?: string;
 }
 
 export const CommentSection = ({ 
   post, 
   onComment, 
   showComments,
-  setShowComments
+  setShowComments,
+  className = ''
 }: CommentSectionProps) => {
   const [comment, setComment] = useState('');
 
@@ -26,7 +28,7 @@ export const CommentSection = ({
   };
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className={`mt-4 space-y-4 ${className}`}>
       {showComments && (
         <>
           <div className="flex gap-2">

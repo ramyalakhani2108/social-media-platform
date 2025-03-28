@@ -9,8 +9,6 @@ import {
   MessageSquare,
   Bot,
   LogOut,
-  Moon,
-  Sun,
   Film,
   Bell,
 } from 'lucide-react';
@@ -22,7 +20,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ className = '' }: SidebarProps) => {
-  const { user, logout } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { pathname } = useLocation();
   const { theme, toggleTheme } = useTheme();
 
@@ -36,13 +34,12 @@ export const Sidebar = ({ className = '' }: SidebarProps) => {
     { icon: Bot, label: 'Chatbot', path: '/chatbot' },
     { icon: Settings, label: 'Settings', path: '/settings' },
     { icon: User, label: 'Profile', path: `/profile/${user?.id}` },
-    // Only show Admin link if user.isAdmin is true
     ...(user?.isAdmin === true
-      ? [{ icon: Settings, label: 'Admin', path: '/admin' }]
+      ? [{ icon: Settings, label: 'Admin Panel', path: '/admin' }]
       : []),
   ];
 
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white p-4 transition-transform dark:border-gray-700 dark:bg-gray-900">
         <div className="flex h-full flex-col items-center justify-center">
@@ -99,8 +96,8 @@ export const Sidebar = ({ className = '' }: SidebarProps) => {
                     : ''
                 }`}
               >
-                <Icon className="h-5 w-5 mr-3 text-slate-500 dark:text-slate-400 group-hover:text-blue-500/80 dark:group-hover:text-blue-400/80 transition-colors" />
-                <span className="font-medium tracking-wide group-hover:text-blue-500/90 dark:group-hover:text-blue-400/90 transition-colors">
+                <Icon className="w-5 h-5 mr-3 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-200" />
+                <span className="text-sm font-medium transition-colors duration-200">
                   {item.label}
                 </span>
               </Link>
@@ -108,26 +105,18 @@ export const Sidebar = ({ className = '' }: SidebarProps) => {
           })}
         </nav>
 
-        <div className="mt-auto flex flex-col space-y-2">
+        <div className="mt-auto">
           <Button
             variant="ghost"
-            onClick={toggleTheme}
-            className="justify-start text-gray-900 dark:text-white transition-all duration-200"
+            size="sm"
+            className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => {
+              useAuthStore.getState().logout();
+              window.location.href = '/login';
+            }}
           >
-            {theme === 'dark' ? (
-              <Sun className="mr-3 h-5 w-5 transition-transform duration-200" />
-            ) : (
-              <Moon className="mr-3 h-5 w-5 transition-transform duration-200" />
-            )}
-            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={logout}
-            className="justify-start text-gray-900 dark:text-white transition-all duration-200"
-          >
-            <LogOut className="mr-3 h-5 w-5 transition-transform duration-200" />
-            Logout
+            <LogOut className="w-4 h-4 mr-3" />
+            <span>Logout</span>
           </Button>
         </div>
       </div>

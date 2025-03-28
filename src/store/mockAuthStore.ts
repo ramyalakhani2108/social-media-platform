@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, Highlight } from '@/types';
+import { User, Highlight, Post } from '@/types';
 
 // Predefined test accounts for easy testing
 const TEST_ACCOUNTS = {
@@ -174,126 +174,412 @@ export const SAMPLE_USERS: User[] = [
 ];
 
 interface AuthState {
-  isAuthenticated: boolean;
   user: User | null;
+  isAuthenticated: boolean;
   error: string | null;
   isLoading: boolean;
-  settingsMenu: Array<{
+  isFetchingFollowers: boolean;
+  isFetchingFollowing: boolean;
+  theme: 'light' | 'dark';
+  notifications_enabled: boolean;
+  privacy_settings: {
+    posts: 'public' | 'friends' | 'only_me';
+    stories: 'public' | 'friends' | 'only_me';
+    comments: 'everyone' | 'friends' | 'only_me';
+  };
+  settingsLoading: boolean;
+  settingsError: string | null;
+  followers: {
     id: string;
-    title: string;
-    icon: string;
-    action: () => void;
-  }>;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  updateUser: (updates: Partial<User>) => void;
+    username: string;
+    avatar_url: string;
+    is_following: boolean;
+  }[];
+  following: {
+    id: string;
+    username: string;
+    avatar_url: string;
+    is_following: boolean;
+  }[];
+  savedPosts: Post[];
 }
+
+const initialState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  error: null,
+  isLoading: false,
+  isFetchingFollowers: false,
+  isFetchingFollowing: false,
+  theme: 'light',
+  notifications_enabled: true,
+  privacy_settings: {
+    posts: 'public',
+    stories: 'friends',
+    comments: 'everyone',
+  },
+  settingsLoading: false,
+  settingsError: null,
+  followers: [],
+  following: [],
+  savedPosts: [],
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      isAuthenticated: false,
-      user: null,
-      error: null,
-      isLoading: false,
-      settingsMenu: [
-        {
-          id: '1',
-          title: 'Edit Profile',
-          icon: 'user',
-          action: () => {
-            console.log('Edit Profile clicked');
-          },
-        },
-        {
-          id: '2',
-          title: 'Settings',
-          icon: 'cog',
-          action: () => {
-            console.log('Settings clicked');
-          },
-        },
-        {
-          id: '3',
-          title: 'Archive',
-          icon: 'archive',
-          action: () => {
-            console.log('Archive clicked');
-          },
-        },
-        {
-          id: '4',
-          title: 'Saved',
-          icon: 'bookmark',
-          action: () => {
-            console.log('Saved clicked');
-          },
-        },
-        {
-          id: '5',
-          title: 'Close Friends',
-          icon: 'users',
-          action: () => {
-            console.log('Close Friends clicked');
-          },
-        },
-        {
-          id: '6',
-          title: 'Themes',
-          icon: 'brush',
-          action: () => {
-            console.log('Themes clicked');
-          },
-        },
-        {
-          id: '7',
-          title: 'Log Out',
-          icon: 'logout',
-          action: () => {
-            set({ isAuthenticated: false, user: null });
-          },
-        },
-      ],
+      ...initialState,
+
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
           // Simulate API call
           await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          // Determine which account to use based on credentials
+          const account = email === 'admin@example.com' && password === 'admin123' 
+            ? TEST_ACCOUNTS.admin 
+            : TEST_ACCOUNTS.user;
 
-          // Find matching test account
-          const account = Object.values(TEST_ACCOUNTS).find(
-            (acc) => acc.email === email && acc.password === password
-          );
-
-          if (!account) {
-            throw new Error('Invalid credentials');
-          }
-
-          // Create user object from account, excluding password
+          // Remove password from account object
           const { password: _, ...user } = account;
 
+          // Simulate fetching followers and following
+          const followers = Array.from({ length: 5 }, (_, i) => ({
+            id: `user-${i}`,
+            username: `user${i}`,
+            avatar_url: `https://randomuser.me/api/portraits/men/${i}.jpg`,
+            is_following: true,
+          }));
+
+          const following = Array.from({ length: 10 }, (_, i) => ({
+            id: `following-${i}`,
+            username: `following${i}`,
+            avatar_url: `https://randomuser.me/api/portraits/women/${i}.jpg`,
+            is_following: true,
+          }));
+
+          // Instagram-like saved posts with various collections
+          const savedPosts = [
+            // Travel Collection
+            {
+              id: '1',
+              userId: 'user-1',
+              user: {
+                id: 'user-1',
+                username: 'travelblogger',
+                avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+                isVerified: true
+              },
+              caption: 'Santorini sunset 🌅 #travel #greekislands',
+              media_url: 'https://images.unsplash.com/photo-1512314889840-32013113b6cc',
+              media_type: 'image' as const,
+              likes_count: 1500,
+              comments_count: 250,
+              comments: [
+                {
+                  id: '1',
+                  userId: 'user-2',
+                  content: 'Amazing shot! 🌟',
+                  created_at: new Date().toISOString()
+                },
+                {
+                  id: '2',
+                  userId: 'user-3',
+                  content: 'Dream destination!',
+                  created_at: new Date().toISOString()
+                }
+              ],
+              created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Travel'
+            },
+            {
+              id: '2',
+              userId: 'user-2',
+              user: {
+                id: 'user-2',
+                username: 'foodie',
+                avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7',
+                isVerified: true
+              },
+              caption: 'Street food adventure in Bangkok 🍜 #foodie #thailand',
+              media_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
+              media_type: 'image' as const,
+              likes_count: 1200,
+              comments_count: 180,
+              comments: [
+                {
+                  id: '3',
+                  userId: 'user-1',
+                  content: 'Yum! What did you try?',
+                  created_at: new Date().toISOString()
+                }
+              ],
+              created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Food'
+            },
+            {
+              id: '3',
+              userId: 'user-3',
+              user: {
+                id: 'user-3',
+                username: 'fashionista',
+                avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
+                isVerified: true
+              },
+              caption: 'New season, new vibe 🎀 #fashion #style',
+              media_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c',
+              media_type: 'image' as const,
+              likes_count: 2100,
+              comments_count: 320,
+              comments: [],
+              created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Fashion'
+            },
+            {
+              id: '4',
+              userId: 'user-4',
+              user: {
+                id: 'user-4',
+                username: 'nature_lover',
+                avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+                isVerified: false
+              },
+              caption: 'Mountain views 🏔️ #nature #landscape',
+              media_url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
+              media_type: 'image' as const,
+              likes_count: 800,
+              comments_count: 120,
+              comments: [],
+              created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Nature'
+            },
+            {
+              id: '5',
+              userId: 'user-5',
+              user: {
+                id: 'user-5',
+                username: 'pet_lover',
+                avatar_url: 'https://images.unsplash.com/photo-1590587000002-739236c4a21d',
+                isVerified: false
+              },
+              caption: 'My furry friend 🐾 #petsofinstagram #cute',
+              media_url: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d',
+              media_type: 'image' as const,
+              likes_count: 1800,
+              comments_count: 280,
+              comments: [
+                {
+                  id: '4',
+                  userId: 'user-1',
+                  content: 'What a beautiful dog!',
+                  created_at: new Date().toISOString()
+                }
+              ],
+              created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Pets'
+            },
+            {
+              id: '6',
+              userId: 'user-6',
+              user: {
+                id: 'user-6',
+                username: 'artistic',
+                avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+                isVerified: true
+              },
+              caption: 'Street art in Berlin 🎨 #art #streetart',
+              media_url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470',
+              media_type: 'image' as const,
+              likes_count: 1400,
+              comments_count: 200,
+              comments: [],
+              created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+              saved: true,
+              collection: 'Art'
+            }
+          ];
+
           set({
-            isAuthenticated: true,
             user: user as User,
+            isAuthenticated: true,
             isLoading: false,
+            followers,
+            following,
+            savedPosts,
           });
         } catch (error) {
           set({
-            error: error instanceof Error ? error.message : 'An error occurred',
+            error: 'Failed to login',
             isLoading: false,
           });
         }
       },
+
       logout: () => {
-        set({
-          isAuthenticated: false,
-          user: null,
-        });
+        set(initialState);
       },
-      updateUser: (updates) => {
-        set((state) => ({
-          user: state.user ? { ...state.user, ...updates } : null,
-        }));
+
+      updateSettings: async (settings: Partial<AuthState>) => {
+        set({ settingsLoading: true, settingsError: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          set((state) => ({
+            ...state,
+            ...settings,
+            settingsLoading: false,
+          }));
+        } catch (error) {
+          set({
+            settingsError: 'Failed to update settings',
+            settingsLoading: false,
+          });
+        }
+      },
+
+      updateFollowStatus: async (userId: string, isFollowing: boolean) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          set((state) => {
+            const newState = { ...state };
+            if (isFollowing) {
+              newState.following.push({
+                id: userId,
+                username: `user${userId}`,
+                avatar_url: `https://randomuser.me/api/portraits/women/${userId}.jpg`,
+                is_following: true,
+              });
+            } else {
+              newState.following = newState.following.filter(u => u.id !== userId);
+            }
+            return newState;
+          });
+        } catch (error) {
+          set({
+            error: 'Failed to update follow status',
+            isLoading: false,
+          });
+        }
+      },
+
+      fetchFollowers: async () => {
+        set({ isFetchingFollowers: true, error: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          const followers = Array.from({ length: 5 }, (_, i) => ({
+            id: `user-${i}`,
+            username: `user${i}`,
+            avatar_url: `https://randomuser.me/api/portraits/men/${i}.jpg`,
+            is_following: true,
+          }));
+
+          set((state) => ({
+            ...state,
+            followers,
+            isFetchingFollowers: false,
+          }));
+        } catch (error) {
+          set({
+            error: 'Failed to fetch followers',
+            isFetchingFollowers: false,
+          });
+        }
+      },
+
+      fetchFollowing: async () => {
+        set({ isFetchingFollowing: true, error: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          const following = Array.from({ length: 10 }, (_, i) => ({
+            id: `following-${i}`,
+            username: `following${i}`,
+            avatar_url: `https://randomuser.me/api/portraits/women/${i}.jpg`,
+            is_following: true,
+          }));
+
+          set((state) => ({
+            ...state,
+            following,
+            isFetchingFollowing: false,
+          }));
+        } catch (error) {
+          set({
+            error: 'Failed to fetch following',
+            isFetchingFollowing: false,
+          });
+        }
+      },
+
+      savePost: async (postId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          const post: Post = {
+            id: postId,
+            userId: 'user-1',
+            user: {
+              id: 'user-1',
+              username: 'user1',
+              avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+              isVerified: false,
+            },
+            caption: 'Post caption',
+            media_url: 'https://picsum.photos/600/400?random=1',
+            media_type: 'image' as const,
+            likes_count: Math.floor(Math.random() * 100),
+            comments_count: Math.floor(Math.random() * 50),
+            comments: [],
+            created_at: new Date().toISOString(),
+            saved: true,
+            collection: 'General',
+          };
+
+          set((state) => ({
+            ...state,
+            savedPosts: [...state.savedPosts, post],
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: 'Failed to save post',
+            isLoading: false,
+          });
+        }
+      },
+
+      unsavePost: async (postId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          
+          set((state) => ({
+            ...state,
+            savedPosts: state.savedPosts.filter(post => post.id !== postId),
+            isLoading: false,
+          }));
+        } catch (error) {
+          set({
+            error: 'Failed to unsave post',
+            isLoading: false,
+          });
+        }
       },
     }),
     {
