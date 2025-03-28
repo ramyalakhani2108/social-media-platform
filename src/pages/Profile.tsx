@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { Grid, List } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { PostCard } from '../components/post/PostCard';
@@ -12,7 +11,6 @@ import { Post } from '@/types';
 export const Profile = () => {
   const { user } = useAuthStore();
   const { followUser } = useSuggestionsStore();
-  const { userId } = useParams();
 
   // For now, we'll just display the current user's profile
   const profileUser = user;
@@ -32,7 +30,7 @@ export const Profile = () => {
   const SAMPLE_POSTS: Post[] = [
     {
       id: '1',
-      userId: profileUser?.id || userId || '1',
+      userId: profileUser?.id || '1',
       caption: 'Beautiful sunset at the beach',
       media_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
       media_type: 'image',
@@ -40,7 +38,7 @@ export const Profile = () => {
       comments_count: 8,
       created_at: new Date().toISOString(),
       user: {
-        id: profileUser?.id || userId || '1',
+        id: profileUser?.id || '1',
         username: profileUser?.username || 'johndoe',
         avatar_url: profileUser?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
         isVerified: profileUser?.isVerified || false
@@ -49,7 +47,7 @@ export const Profile = () => {
     },
     {
       id: '2',
-      userId: profileUser?.id || userId || '1',
+      userId: profileUser?.id || '1',
       caption: 'City lights',
       media_url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390',
       media_type: 'image',
@@ -57,7 +55,7 @@ export const Profile = () => {
       comments_count: 5,
       created_at: new Date().toISOString(),
       user: {
-        id: profileUser?.id || userId || '1',
+        id: profileUser?.id || '1',
         username: profileUser?.username || 'johndoe',
         avatar_url: profileUser?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
         isVerified: profileUser?.isVerified || false

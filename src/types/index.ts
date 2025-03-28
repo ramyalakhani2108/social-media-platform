@@ -41,8 +41,6 @@ export interface Post {
     avatar_url: string;
     isVerified: boolean;
   };
-  saved: boolean;
-  collection: string;
 }
 
 export interface Story {
