@@ -22,12 +22,12 @@ export const PostActions = ({
   setShowComments
 }: PostActionsProps) => {
   return (
-    <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
+    <div className="flex items-center gap-4">
       <Button
         variant="ghost"
         size="sm"
         onClick={onLike}
-        className={`gap-2 w-full sm:w-auto ${isLiked ? 'text-red-500' : ''}`}
+        className={`gap-2 ${isLiked ? 'text-red-500' : ''}`}
       >
         <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
         {post.likes_count}
@@ -36,7 +36,7 @@ export const PostActions = ({
         variant="ghost" 
         size="sm" 
         onClick={() => setShowComments(!showComments)}
-        className="gap-2 w-full sm:w-auto"
+        className="gap-2"
       >
         <MessageCircle className="h-5 w-5" />
         {post.comments_count}
@@ -45,7 +45,7 @@ export const PostActions = ({
         variant="ghost" 
         size="sm" 
         onClick={onShare}
-        className="gap-2 w-full sm:w-auto"
+        className="gap-2"
       >
         <Share2 className="h-5 w-5" />
       </Button>
@@ -53,7 +53,7 @@ export const PostActions = ({
         variant="ghost" 
         size="sm" 
         onClick={onBookmark}
-        className="gap-2 w-full sm:w-auto"
+        className="gap-2"
       >
         <Bookmark className="h-5 w-5" />
       </Button>

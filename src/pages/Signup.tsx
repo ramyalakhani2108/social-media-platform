@@ -1,89 +1,20 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Link, useNavigate } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { SIGNUP_MUTATION } from '../graphql/mutations';
-import { useAuth } from '../hooks/useAuth';
-import type { AuthResponse } from '../types/auth';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
-
-  const [signup, { loading }] = useMutation<{ signup: AuthResponse }>(SIGNUP_MUTATION, {
-    onCompleted: (data) => {
-      login(data.signup.access_token, data.signup.user);
-      navigate('/');
-    },
-    onError: (error) => {
-      setError(error.message);
-    },
-  });
-
-  const validatePassword = (password: string) => {
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-={};':"\\|,.<>?]/.test(password);
-    const isLongEnough = password.length >= 8;
-    return hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLongEnough;
-  };
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateUsername = (username: string) => {
-    return username.length >= 3 && username.length <= 20;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Reset error state
-    setError('');
-
-    // Client-side validation
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    if (!validateUsername(username)) {
-      setError('Username must be between 3 and 20 characters');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (!validatePassword(password)) {
-      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be at least 8 characters long');
-      return;
-    }
-
-    try {
-      await signup({
-        variables: {
-          data: {
-            username,
-            email,
-            password,
-          },
-        },
-      });
-    } catch (error) {
-      setError(error.message);
-    }
+    // TODO: Implement signup logic
+    console.log('Signup attempt:', { username, email, password });
   };
 
   return (
@@ -102,11 +33,6 @@ export function Signup() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/50 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded relative" role="alert">
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
             <div>
               <Input
                 type="text"
@@ -154,10 +80,9 @@ export function Signup() {
             <div>
               <Button
                 type="submit"
-                disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-400 transition-colors duration-200"
               >
-                {loading ? 'Signing up...' : 'Sign up'}
+                Sign up
               </Button>
             </div>
           </form>
@@ -211,7 +136,7 @@ export function Signup() {
             <div className="mt-6">
               <Link
                 to="/login"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:text-indigo-400 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-400 transition-colors duration-200"
               >
                 Sign in
               </Link>
